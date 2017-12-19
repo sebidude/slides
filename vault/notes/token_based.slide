@@ -1,0 +1,68 @@
+Vault as secrets store
+Simple policy-based tokens
+
+sebidude
+
+* Overview
+
+- Vault Server
+- read/write some secrets
+- Create a policy
+- Create a token
+
+* Vault Server
+ vault server -dev
+- Store the root token
+- Store the unseal key
+
+Login and check token
+
+ export VAULT_ADDR='http://127.0.0.1:8200'
+ vault auth
+ vault token-lookup
+
+Lock down the vault.
+
+ vault seal
+
+look at the server log
+
+ vault unseal
+ <paste unseal key>
+
+* read/write some secrets
+
+ vault write secret/jenkins/ssh-key pass='123' 
+ vault read secret/jenkins/ssh-key
+
+and some more
+
+ vault write secret/jenkins/testbackend pass='123' user="testuser" 
+ vault read secret/jenkins/testbackend
+
+but be careful
+
+ vault write secret/jenkins/testbackend pass='123456'
+ vault read secret/jenkins/testbackend
+ --- Ooops ---
+ vault write secret/jenkins/testbackend pass='123456' user='testuser'
+ vault read secret/jenkins/testbackend
+
+* Create a policy 
+Store this code in _jenkins.hcl_.
+.code ../policies/jenkins.hcl
+
+ vault policy-write jenkins jenkins.hcl
+
+Create an auth token
+
+ vault token-create -policy jenkins -ttl 1h
+
+Copy the auth token
+
+* Go Play with this
+- open another shell and use the jenkins token to login
+- try read and write  
+- create another policy
+- create another auth token
+- ...
